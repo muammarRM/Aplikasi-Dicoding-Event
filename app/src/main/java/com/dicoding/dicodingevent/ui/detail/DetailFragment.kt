@@ -1,16 +1,18 @@
 package com.dicoding.dicodingevent.ui.detail
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.navArgs
 import com.bumptech.glide.Glide
-import com.dicoding.dicodingevent.R
 import com.dicoding.dicodingevent.data.response.Event
 import com.dicoding.dicodingevent.databinding.FragmentDetailBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -32,8 +34,9 @@ class DetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val bottomNav = activity?.findViewById<BottomNavigationView>(R.id.nav_view)
+        val bottomNav = activity?.findViewById<BottomNavigationView>(com.dicoding.dicodingevent.R.id.nav_view)
         bottomNav?.visibility = View.GONE
+
         // Initialize ViewModel
         viewModel = ViewModelProvider(this).get(DetailViewModel::class.java)
 
@@ -59,22 +62,40 @@ class DetailFragment : Fragment() {
     }
 
     private fun bindDataToView(event: Event) {
+        // Set event name with a descriptive message
         binding.tvEventName.text = event.name
         binding.tvEventDescription.text = event.summary
-        binding.tvOwnerName.text = event.ownerName
-        binding.tvCityName.text = event.cityName
-        binding.tvBeginTime.text = event.beginTime
-        binding.tvEndTime.text = event.endTime
+
+        // Owner name with context
+        binding.tvOwnerName.text = "Organized by: ${event.ownerName}"
+
+        // Display city name clearly
+        binding.tvCityName.text = "Location: ${event.cityName}"
+
+        // Begin and end time
+        binding.tvBeginTime.text = "Start Time: ${event.beginTime}"
+        binding.tvEndTime.text = "End Time: ${event.endTime}"
+
+        // Display available slots
+        binding.tvQuota.text = "${event.quota - event.registrants} slots available"
 
         // Load image using Glide
         Glide.with(requireContext())
             .load(event.mediaCover)
             .into(binding.ivMediaCover)
+
+        val buttonLink: Button = binding.buttonLink
+
+        buttonLink.setOnClickListener {
+            val link = event.link // Pastikan Anda memiliki properti link di model Event
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
+            startActivity(intent)
+        }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        val bottomNav = activity?.findViewById<BottomNavigationView>(R.id.nav_view)
+        val bottomNav = activity?.findViewById<BottomNavigationView>(com.dicoding.dicodingevent.R.id.nav_view)
         bottomNav?.visibility = View.VISIBLE
     }
 }
