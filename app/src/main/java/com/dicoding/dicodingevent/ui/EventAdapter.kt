@@ -7,7 +7,10 @@ import com.bumptech.glide.Glide
 import com.dicoding.dicodingevent.data.response.ListEventsItem
 import com.dicoding.dicodingevent.databinding.ItemEventBinding
 
-class EventAdapter(private val eventList: List<ListEventsItem>,  private val onItemClick: (ListEventsItem) -> Unit) : RecyclerView.Adapter<EventAdapter.EventViewHolder>() {
+class EventAdapter(
+    private val eventList: List<ListEventsItem>,
+    private val onItemClick: (ListEventsItem) -> Unit
+) : RecyclerView.Adapter<EventAdapter.EventViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EventViewHolder {
         val binding = ItemEventBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -16,19 +19,22 @@ class EventAdapter(private val eventList: List<ListEventsItem>,  private val onI
 
     override fun onBindViewHolder(holder: EventViewHolder, position: Int) {
         val event = eventList[position]
-        holder.binding.tvtitle.text = event.name
-        holder.binding.tvdescription.text = event.summary
-        Glide.with(holder.itemView.context)
-            .load(event.imageLogo)
-            .into(holder.binding.imgItemPhoto)
-
-        holder.itemView.setOnClickListener { view ->
-            onItemClick(event)
-        }
+        holder.bind(event)
     }
 
     override fun getItemCount(): Int = eventList.size
 
-    class EventViewHolder(var binding: ItemEventBinding) : RecyclerView.ViewHolder(binding.root)
-}
+    inner class EventViewHolder(private val binding: ItemEventBinding) : RecyclerView.ViewHolder(binding.root) {
+        fun bind(event: ListEventsItem) {
+            with(binding) {
+                tvtitle.text = event.name
+                tvdescription.text = event.summary
+                Glide.with(itemView.context)
+                    .load(event.imageLogo)
+                    .into(imgItemPhoto)
 
+                itemView.setOnClickListener { onItemClick(event) }
+            }
+        }
+    }
+}

@@ -6,8 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.dicoding.dicodingevent.databinding.FragmentUpcomingBinding
@@ -16,13 +15,10 @@ import com.dicoding.dicodingevent.ui.EventAdapter
 class UpcomingFragment : Fragment() {
     private var _binding: FragmentUpcomingBinding? = null
     private val binding get() = _binding!!
-    private lateinit var viewModel: UpcomingViewModel
+    private val viewModel: UpcomingViewModel by viewModels()
     private lateinit var eventAdapter: EventAdapter
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentUpcomingBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -30,15 +26,10 @@ class UpcomingFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Setup RecyclerView
         binding.rvUpcoming.layoutManager = LinearLayoutManager(requireContext())
         binding.rvUpcoming.setHasFixedSize(true)
 
-        // Initialize ViewModel
-        viewModel = ViewModelProvider(this).get(UpcomingViewModel::class.java)
-
-        // Observe LiveData from ViewModel
-        viewModel.upcomingEvent.observe(viewLifecycleOwner, Observer { eventList ->
+        viewModel.upcomingEvent.observe(viewLifecycleOwner) { eventList ->
             eventList?.let {
                 eventAdapter = EventAdapter(it) { event ->
                     val detailEvent = UpcomingFragmentDirections.actionNavigationUpcomingToDetailFragment(event.id)
@@ -46,21 +37,18 @@ class UpcomingFragment : Fragment() {
                 }
                 binding.rvUpcoming.adapter = eventAdapter
             }
-        })
+        }
 
-        // Handle loading state
-        viewModel.isLoading.observe(viewLifecycleOwner, Observer { isLoading ->
+        viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
             binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
-        })
+        }
 
-        // Handle error state
-        viewModel.errorMessage.observe(viewLifecycleOwner, Observer { message ->
+        viewModel.errorMessage.observe(viewLifecycleOwner) { message ->
             message?.let {
                 Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
             }
-        })
+        }
 
-        // Fetch data
         viewModel.getUpcomingEvent()
     }
 

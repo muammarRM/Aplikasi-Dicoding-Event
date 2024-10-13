@@ -1,16 +1,17 @@
 package com.dicoding.dicodingevent.ui.detail
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.text.HtmlCompat
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
 import com.bumptech.glide.Glide
 import com.dicoding.dicodingevent.data.response.Event
@@ -20,7 +21,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 class DetailFragment : Fragment() {
     private var _binding: FragmentDetailBinding? = null
     private val binding get() = _binding!!
-    private lateinit var viewModel: DetailViewModel
+    private val viewModel: DetailViewModel by viewModels()
     private val args: DetailFragmentArgs by navArgs()
 
     override fun onCreateView(
@@ -34,68 +35,59 @@ class DetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val bottomNav = activity?.findViewById<BottomNavigationView>(com.dicoding.dicodingevent.R.id.nav_view)
-        bottomNav?.visibility = View.GONE
+        hideBottomNavigationView()
+        observeViewModel()
 
-        // Initialize ViewModel
-        viewModel = ViewModelProvider(this).get(DetailViewModel::class.java)
-
-        // Observe LiveData from ViewModel
-        viewModel.eventDetail.observe(viewLifecycleOwner, Observer { event ->
-            event?.let {
-                bindDataToView(it)
-            }
-        })
-
-        viewModel.isLoading.observe(viewLifecycleOwner, Observer { isLoading ->
-            binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
-        })
-
-        viewModel.errorMessage.observe(viewLifecycleOwner, Observer { message ->
-            message?.let {
-                Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
-            }
-        })
-
-        // Get event detail using eventId passed from previous fragment
         viewModel.getEventDetail(args.eventId)
     }
 
+    private fun hideBottomNavigationView() {
+        activity?.findViewById<BottomNavigationView>(com.dicoding.dicodingevent.R.id.nav_view)?.visibility = View.GONE
+    }
+
+    private fun observeViewModel() {
+        viewModel.eventDetail.observe(viewLifecycleOwner) { event ->
+            event?.let {
+                bindDataToView(it)
+                (requireActivity() as AppCompatActivity).supportActionBar?.title = it.name
+            }
+        }
+
+        viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
+            binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+        }
+
+        viewModel.errorMessage.observe(viewLifecycleOwner) { message ->
+            message?.let {
+                Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    @SuppressLint("SetTextI18n")
     private fun bindDataToView(event: Event) {
-        // Set event name with a descriptive message
-        binding.tvEventName.text = event.name
-        binding.tvEventDescription.text = event.summary
+        binding.apply {
+            tvEventName.text = event.name
+            tvEventDescription.text = HtmlCompat.fromHtml(event.description, HtmlCompat.FROM_HTML_MODE_LEGACY)
+            tvOwnerName.text = "Organized by: ${event.ownerName}"
+            tvCityName.text = "Location: ${event.cityName}"
+            tvBeginTime.text = "Start Time: ${event.beginTime}"
+            tvEndTime.text = "End Time: ${event.endTime}"
+            tvQuota.text = "${event.quota - event.registrants} slots available"
 
-        // Owner name with context
-        binding.tvOwnerName.text = "Organized by: ${event.ownerName}"
+            Glide.with(requireContext())
+                .load(event.mediaCover)
+                .into(ivMediaCover)
 
-        // Display city name clearly
-        binding.tvCityName.text = "Location: ${event.cityName}"
-
-        // Begin and end time
-        binding.tvBeginTime.text = "Start Time: ${event.beginTime}"
-        binding.tvEndTime.text = "End Time: ${event.endTime}"
-
-        // Display available slots
-        binding.tvQuota.text = "${event.quota - event.registrants} slots available"
-
-        // Load image using Glide
-        Glide.with(requireContext())
-            .load(event.mediaCover)
-            .into(binding.ivMediaCover)
-
-        val buttonLink: Button = binding.buttonLink
-
-        buttonLink.setOnClickListener {
-            val link = event.link // Pastikan Anda memiliki properti link di model Event
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
-            startActivity(intent)
+            buttonLink.setOnClickListener {
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(event.link)))
+            }
         }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        val bottomNav = activity?.findViewById<BottomNavigationView>(com.dicoding.dicodingevent.R.id.nav_view)
-        bottomNav?.visibility = View.VISIBLE
+        activity?.findViewById<BottomNavigationView>(com.dicoding.dicodingevent.R.id.nav_view)?.visibility = View.VISIBLE
+        _binding = null
     }
 }
