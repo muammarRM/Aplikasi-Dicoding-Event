@@ -7,7 +7,7 @@ import com.bumptech.glide.Glide
 import com.dicoding.dicodingevent.data.response.ListEventsItem
 import com.dicoding.dicodingevent.databinding.ItemEventBinding
 
-class EventAdapter(private val eventList: List<ListEventsItem>) : RecyclerView.Adapter<EventAdapter.EventViewHolder>() {
+class EventAdapter(private val eventList: List<ListEventsItem>,  private val onItemClick: (ListEventsItem) -> Unit) : RecyclerView.Adapter<EventAdapter.EventViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EventViewHolder {
         val binding = ItemEventBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -21,6 +21,10 @@ class EventAdapter(private val eventList: List<ListEventsItem>) : RecyclerView.A
         Glide.with(holder.itemView.context)
             .load(event.imageLogo)
             .into(holder.binding.imgItemPhoto)
+
+        holder.itemView.setOnClickListener { view ->
+            onItemClick(event)
+        }
     }
 
     override fun getItemCount(): Int = eventList.size
