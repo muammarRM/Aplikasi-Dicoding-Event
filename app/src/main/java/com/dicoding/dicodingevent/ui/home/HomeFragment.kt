@@ -74,7 +74,6 @@ class HomeFragment : Fragment() {
 
             override fun onQueryTextChange(newText: String?): Boolean {
                 if (newText.isNullOrEmpty()) {
-                    // Tampilkan ulang Upcoming dan Completed saat pencarian kosong
                     binding.rvSearchResults.visibility = View.GONE
                     binding.rvUpcoming.visibility = View.VISIBLE
                     binding.rvCompleted.visibility = View.VISIBLE
@@ -105,14 +104,12 @@ class HomeFragment : Fragment() {
 
         viewModel.searchEvent.observe(viewLifecycleOwner) { eventList ->
             if (eventList.isNullOrEmpty()) {
-                // Jika tidak ada hasil pencarian, tampilkan Upcoming dan Completed
                 binding.rvSearchResults.visibility = View.GONE
                 binding.rvUpcoming.visibility = View.VISIBLE
                 binding.rvCompleted.visibility = View.VISIBLE
                 binding.upcomingTitle.visibility = View.VISIBLE
                 binding.completedTitle.visibility = View.VISIBLE
             } else {
-                // Jika ada hasil pencarian, tampilkan hasil pencarian dan sembunyikan yang lain
                 val eventItems = eventList.map { EventItem.Regular(it) }
                 searchResultsAdapter.submitList(eventItems)
 

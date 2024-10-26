@@ -82,11 +82,12 @@ class DetailFragment : Fragment() {
                     tvEventName.text = event.name
                     tvEventDescription.text =
                         HtmlCompat.fromHtml(event.description, HtmlCompat.FROM_HTML_MODE_LEGACY)
-                    tvOwnerName.text = "Organized by: ${event.ownerName}"
-                    tvCityName.text = "Location: ${event.cityName}"
-                    tvBeginTime.text = "Start Time: ${event.beginTime}"
-                    tvEndTime.text = "End Time: ${event.endTime}"
-                    tvQuota.text = "${event.quota - event.registrants} slots available"
+                    tvOwnerName.text = getString(R.string.organized_by, event.ownerName)
+                    tvCityName.text = getString(R.string.location, event.cityName)
+                    tvBeginTime.text = getString(R.string.start_time, event.beginTime)
+                    tvEndTime.text = getString(R.string.end_time, event.endTime)
+                    tvQuota.text = getString(R.string.slots_available, event.quota - event.registrants)
+
 
                     Glide.with(requireContext())
                         .load(event.mediaCover)

@@ -34,7 +34,6 @@ class FavoriteFragment : Fragment() {
         binding.rvFavorite.layoutManager = LinearLayoutManager(requireContext())
         binding.rvFavorite.setHasFixedSize(true)
 
-        // Inisialisasi adapter
         eventAdapter = EventAdapter { eventItem ->
             when (eventItem) {
                 is EventItem.Regular -> {

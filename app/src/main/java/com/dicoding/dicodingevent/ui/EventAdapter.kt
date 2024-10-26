@@ -74,10 +74,10 @@ class EventAdapter(
     inner class FavoriteEventViewHolder(private val binding: ItemEventBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(event: EventEntity) {
             with(binding) {
-                tvtitle.text = event.name // Ganti dengan property yang sesuai dari EventEntity
-                tvdescription.text = event.description // Ganti dengan property yang sesuai dari EventEntity
+                tvtitle.text = event.name
+                tvdescription.text = event.description
                 Glide.with(itemView.context)
-                    .load(event.mediaCover) // Ganti dengan property yang sesuai dari EventEntity
+                    .load(event.mediaCover)
                     .into(imgItemPhoto)
 
                 itemView.setOnClickListener { onItemClick(EventItem.Favorite(event)) }

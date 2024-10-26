@@ -32,7 +32,6 @@ class UpcomingFragment : Fragment() {
         binding.rvUpcoming.layoutManager = LinearLayoutManager(requireContext())
         binding.rvUpcoming.setHasFixedSize(true)
 
-        // Inisialisasi adapter
         eventAdapter = EventAdapter { eventItem ->
             when (eventItem) {
                 is EventItem.Regular -> {
@@ -45,11 +44,10 @@ class UpcomingFragment : Fragment() {
                 }
             }
         }
-        binding.rvUpcoming.adapter = eventAdapter // Set adapter ke RecyclerView
+        binding.rvUpcoming.adapter = eventAdapter
 
-        // Ambil acara mendatang
         viewModel.getUpcomingEvent()
-        observeData() // Memanggil fungsi observeData untuk memantau data
+        observeData()
     }
 
     private fun observeData() {

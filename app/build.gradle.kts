@@ -1,7 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    id("androidx.navigation.safeargs.kotlin") version "2.8.2"
+    id("androidx.navigation.safeargs.kotlin") version "2.8.3"
     id("com.google.devtools.ksp")
     id("kotlin-parcelize")
 }
@@ -42,6 +42,11 @@ android {
 }
 
 dependencies {
+
+    implementation(libs.moshi.kotlin)
+    ksp(libs.moshi.kotlin.codegen)
+    implementation(libs.androidx.work.runtime)
+    implementation(libs.android.async.http)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)

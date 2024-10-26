@@ -46,9 +46,9 @@ class EventViewModel(
             _isLoading.value = false
             result.onSuccess {
                 _upcomingEvent.value = it
-                _errorMessage.value = null // Mengosongkan pesan kesalahan saat sukses
+                _errorMessage.value = null
             }.onFailure {
-                _errorMessage.value = it.message // Menetapkan pesan kesalahan
+                _errorMessage.value = it.message
             }
         }
     }
@@ -60,9 +60,9 @@ class EventViewModel(
             _isLoading.value = false
             result.onSuccess {
                 _completedEvent.value = it
-                _errorMessage.value = null // Mengosongkan pesan kesalahan saat sukses
+                _errorMessage.value = null
             }.onFailure {
-                _errorMessage.value = it.message // Menetapkan pesan kesalahan
+                _errorMessage.value = it.message
             }
         }
     }
@@ -74,9 +74,9 @@ class EventViewModel(
             _isLoading.value = false
             result.onSuccess {
                 _detailEvent.value = it
-                _errorMessage.value = null // Mengosongkan pesan kesalahan saat sukses
+                _errorMessage.value = null
             }.onFailure {
-                _errorMessage.value = it.message // Menetapkan pesan kesalahan
+                _errorMessage.value = it.message
             }
         }
     }
@@ -88,9 +88,9 @@ class EventViewModel(
             _isLoading.value = false
             result.onSuccess {
                 _searchEvent.value = it
-                _errorMessage.value = null // Mengosongkan pesan kesalahan saat sukses
+                _errorMessage.value = null
             }.onFailure {
-                _errorMessage.value = it.message // Menetapkan pesan kesalahan
+                _errorMessage.value = it.message
             }
         }
     }
@@ -107,7 +107,7 @@ class EventViewModel(
         viewModelScope.launch {
             val success = eventRepository.insertEvent(event)
             if (!success) {
-                _errorMessage.value = "Failed to insert favorite event" // Menetapkan pesan kesalahan
+                _errorMessage.value = "Failed to insert favorite event"
             }
         }
     }
@@ -116,7 +116,7 @@ class EventViewModel(
         viewModelScope.launch {
             val success = eventRepository.deleteEvent(event)
             if (!success) {
-                _errorMessage.value = "Failed to delete favorite event" // Menetapkan pesan kesalahan
+                _errorMessage.value = "Failed to delete favorite event"
             }
         }
     }
@@ -128,7 +128,15 @@ class EventViewModel(
     fun getThemeSettings(): LiveData<Boolean> {
         return pref.getThemeSetting().asLiveData()
     }
+    fun getDailyReminderSetting(): LiveData<Boolean> {
+        return pref.getDailyReminderSetting().asLiveData()
+    }
 
+    fun saveDailyReminderSetting(isReminderActive: Boolean) {
+        viewModelScope.launch {
+            pref.saveDailyReminderSetting(isReminderActive)
+        }
+    }
     fun saveThemeSetting(isDarkModeActive: Boolean) {
         viewModelScope.launch {
             pref.saveThemeSetting(isDarkModeActive)
