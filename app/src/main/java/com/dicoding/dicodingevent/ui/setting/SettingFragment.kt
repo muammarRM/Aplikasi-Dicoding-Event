@@ -56,6 +56,31 @@ class SettingFragment : Fragment() {
         return binding.root
     }
 
+    override fun onResume() {
+        super.onResume()
+        val currentNightMode = resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK
+        val isSystemDarkMode = currentNightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES
+
+        viewModel.getThemeSettings().observe(viewLifecycleOwner) { isDarkModeActive ->
+            val shouldUseDarkMode = isDarkModeActive || isSystemDarkMode
+            AppCompatDelegate.setDefaultNightMode(
+                if (shouldUseDarkMode) AppCompatDelegate.MODE_NIGHT_YES
+                else AppCompatDelegate.MODE_NIGHT_NO
+            )
+
+            binding.switchTheme.setOnCheckedChangeListener(null)
+            binding.switchTheme.isChecked = shouldUseDarkMode
+            binding.switchTheme.setOnCheckedChangeListener { _, isChecked ->
+                AppCompatDelegate.setDefaultNightMode(
+                    if (isChecked) AppCompatDelegate.MODE_NIGHT_YES
+                    else AppCompatDelegate.MODE_NIGHT_NO
+                )
+                lifecycleScope.launch {
+                    viewModel.saveThemeSetting(isChecked)
+                }
+            }
+        }
+    }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 

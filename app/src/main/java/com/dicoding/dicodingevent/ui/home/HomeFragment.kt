@@ -90,14 +90,14 @@ class HomeFragment : Fragment() {
     private fun observeData() {
         viewModel.upcomingEvent.observe(viewLifecycleOwner) { eventList ->
             eventList?.let {
-                val upcomingItems = it.map { event -> EventItem.Regular(event) }
+                val upcomingItems = it.take(5).map { event -> EventItem.Regular(event) }
                 upcomingEventAdapter.submitList(upcomingItems)
             }
         }
 
         viewModel.completedEvent.observe(viewLifecycleOwner) { eventList ->
             eventList?.let {
-                val completedItems = it.map { event -> EventItem.Regular(event) }
+                val completedItems = it.take(5).map { event -> EventItem.Regular(event) }
                 completedEventAdapter.submitList(completedItems)
             }
         }
