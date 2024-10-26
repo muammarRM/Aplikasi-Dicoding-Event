@@ -11,17 +11,17 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.dicoding.dicodingevent.databinding.FragmentCompletedBinding
 import com.dicoding.dicodingevent.ui.EventAdapter
+import com.dicoding.dicodingevent.ui.EventItem
+import com.dicoding.dicodingevent.ui.EventViewModel
+import com.dicoding.dicodingevent.viewmodel.ViewModelFactory
 
 class CompletedFragment : Fragment() {
     private var _binding: FragmentCompletedBinding? = null
     private val binding get() = _binding!!
-    private val viewModel: CompletedViewModel by viewModels()
+    private val viewModel: EventViewModel by viewModels { ViewModelFactory.getInstance(requireContext()) }
     private lateinit var eventAdapter: EventAdapter
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentCompletedBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -32,13 +32,30 @@ class CompletedFragment : Fragment() {
         binding.rvCompleted.layoutManager = LinearLayoutManager(requireContext())
         binding.rvCompleted.setHasFixedSize(true)
 
-        viewModel.completedEvent.observe(viewLifecycleOwner) { eventList ->
-            eventList?.let {
-                eventAdapter = EventAdapter(it) { event ->
-                    val detailEvent = CompletedFragmentDirections.actionNavigationCompletedToDetailFragment(event.id)
+        // Inisialisasi adapter
+        eventAdapter = EventAdapter { eventItem ->
+            when (eventItem) {
+                is EventItem.Regular -> {
+                    val detailEvent = CompletedFragmentDirections.actionNavigationCompletedToDetailFragment(eventItem.event.id)
                     findNavController().navigate(detailEvent)
                 }
-                binding.rvCompleted.adapter = eventAdapter
+                is EventItem.Favorite -> {
+                    val detailEvent = CompletedFragmentDirections.actionNavigationCompletedToDetailFragment(eventItem.event.id)
+                    findNavController().navigate(detailEvent)
+                }
+            }
+        }
+        binding.rvCompleted.adapter = eventAdapter // Set adapter ke RecyclerView
+
+        // Ambil acara selesai
+        viewModel.getCompletedEvent()
+        observeData() // Memanggil fungsi observeData untuk memantau data
+    }
+
+    private fun observeData() {
+        viewModel.completedEvent.observe(viewLifecycleOwner) { eventList ->
+            eventList?.let {
+                eventAdapter.submitList(it.map { event -> EventItem.Regular(event) })
             }
         }
 
@@ -51,8 +68,6 @@ class CompletedFragment : Fragment() {
                 Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
             }
         }
-
-        viewModel.getCompletedEvent()
     }
 
     override fun onDestroyView() {

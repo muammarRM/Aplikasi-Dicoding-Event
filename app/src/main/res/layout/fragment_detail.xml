@@ -26,7 +26,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
-            android:paddingTop="16dp"
+            android:paddingTop="48dp"
             android:textSize="20sp"
             android:textStyle="bold"
             app:layout_constraintTop_toBottomOf="@+id/ivMediaCover"
@@ -114,6 +114,17 @@
             android:text="@string/daftar_gratis"
             app:layout_constraintTop_toBottomOf="@+id/tvQuota"
             app:layout_constraintEnd_toEndOf="parent"/>
+        <!-- FloatingActionButton untuk favorit -->
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_favorite"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="-28dp"
+            android:contentDescription="@string/add_to_favorite"
+            android:src="@drawable/baseline_favorite_border_24"
+            app:layout_constraintBottom_toBottomOf="@id/ivMediaCover"
+            app:layout_constraintEnd_toEndOf="@id/ivMediaCover"  />
 
         <ProgressBar
             android:id="@+id/progressBar"

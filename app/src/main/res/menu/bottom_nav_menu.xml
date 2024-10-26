@@ -16,4 +16,13 @@
         android:icon="@drawable/baseline_event_available_24"
         android:title="@string/title_completed" />
 
+    <item
+        android:id="@+id/navigation_favorite"
+        android:icon="@drawable/baseline_favorite_24"
+        android:title="@string/favorited" />
+
+    <item
+        android:id="@+id/navigation_setting"
+        android:icon="@drawable/baseline_settings_24"
+        android:title="@string/settings" />
 </menu>

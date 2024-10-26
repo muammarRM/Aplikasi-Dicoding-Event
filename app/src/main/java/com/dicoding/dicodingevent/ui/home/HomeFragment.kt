@@ -12,12 +12,16 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.dicoding.dicodingevent.databinding.FragmentHomeBinding
 import com.dicoding.dicodingevent.ui.EventAdapter
+import com.dicoding.dicodingevent.ui.EventItem
+import com.dicoding.dicodingevent.ui.EventViewModel
+import com.dicoding.dicodingevent.viewmodel.ViewModelFactory
 
 class HomeFragment : Fragment() {
 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
-    private val viewModel: HomeViewModel by viewModels()
+    private val viewModel: EventViewModel by viewModels { ViewModelFactory.getInstance(requireContext()) }
+
     private lateinit var upcomingEventAdapter: EventAdapter
     private lateinit var completedEventAdapter: EventAdapter
     private lateinit var searchResultsAdapter: EventAdapter
@@ -33,48 +37,85 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        setupAdapters()
         setupRecyclerView()
-        observeData()
         setupSearch()
+        observeData()
 
         viewModel.getUpcomingEvent()
-        viewModel.getCompletedEvents()
+        viewModel.getCompletedEvent()
+    }
+
+    private fun setupAdapters() {
+        upcomingEventAdapter = EventAdapter { eventItem -> navigateToDetail(eventItem) }
+        completedEventAdapter = EventAdapter { eventItem -> navigateToDetail(eventItem) }
+        searchResultsAdapter = EventAdapter { eventItem -> navigateToDetail(eventItem) }
     }
 
     private fun setupRecyclerView() {
-        binding.rvSearchResults.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
         binding.rvUpcoming.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+        binding.rvUpcoming.adapter = upcomingEventAdapter
+
         binding.rvCompleted.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+        binding.rvCompleted.adapter = completedEventAdapter
+
+        binding.rvSearchResults.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+        binding.rvSearchResults.adapter = searchResultsAdapter
+    }
+
+    private fun setupSearch() {
+        binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                query?.let {
+                    viewModel.searchEvent(it)
+                }
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                if (newText.isNullOrEmpty()) {
+                    // Tampilkan ulang Upcoming dan Completed saat pencarian kosong
+                    binding.rvSearchResults.visibility = View.GONE
+                    binding.rvUpcoming.visibility = View.VISIBLE
+                    binding.rvCompleted.visibility = View.VISIBLE
+                    binding.upcomingTitle.visibility = View.VISIBLE
+                    binding.completedTitle.visibility = View.VISIBLE
+                } else {
+                    viewModel.searchEvent(newText)
+                }
+                return true
+            }
+        })
     }
 
     private fun observeData() {
         viewModel.upcomingEvent.observe(viewLifecycleOwner) { eventList ->
             eventList?.let {
-                upcomingEventAdapter = EventAdapter(it) { event ->
-                    val detailEvent = HomeFragmentDirections.actionNavigationHomeToDetailFragment(event.id)
-                    findNavController().navigate(detailEvent)
-                }
-                binding.rvUpcoming.adapter = upcomingEventAdapter
+                val upcomingItems = it.map { event -> EventItem.Regular(event) }
+                upcomingEventAdapter.submitList(upcomingItems)
             }
         }
 
-        viewModel.completedEvents.observe(viewLifecycleOwner) { eventList ->
+        viewModel.completedEvent.observe(viewLifecycleOwner) { eventList ->
             eventList?.let {
-                completedEventAdapter = EventAdapter(it) { event ->
-                    val detailEvent = HomeFragmentDirections.actionNavigationHomeToDetailFragment(event.id)
-                    findNavController().navigate(detailEvent)
-                }
-                binding.rvCompleted.adapter = completedEventAdapter
+                val completedItems = it.map { event -> EventItem.Regular(event) }
+                completedEventAdapter.submitList(completedItems)
             }
         }
 
-        viewModel.searchResults.observe(viewLifecycleOwner) { eventList ->
-            eventList?.let {
-                searchResultsAdapter = EventAdapter(it) { event ->
-                    val detailEvent = HomeFragmentDirections.actionNavigationHomeToDetailFragment(event.id)
-                    findNavController().navigate(detailEvent)
-                }
-                binding.rvSearchResults.adapter = searchResultsAdapter
+        viewModel.searchEvent.observe(viewLifecycleOwner) { eventList ->
+            if (eventList.isNullOrEmpty()) {
+                // Jika tidak ada hasil pencarian, tampilkan Upcoming dan Completed
+                binding.rvSearchResults.visibility = View.GONE
+                binding.rvUpcoming.visibility = View.VISIBLE
+                binding.rvCompleted.visibility = View.VISIBLE
+                binding.upcomingTitle.visibility = View.VISIBLE
+                binding.completedTitle.visibility = View.VISIBLE
+            } else {
+                // Jika ada hasil pencarian, tampilkan hasil pencarian dan sembunyikan yang lain
+                val eventItems = eventList.map { EventItem.Regular(it) }
+                searchResultsAdapter.submitList(eventItems)
+
                 binding.rvSearchResults.visibility = View.VISIBLE
                 binding.rvUpcoming.visibility = View.GONE
                 binding.rvCompleted.visibility = View.GONE
@@ -94,26 +135,17 @@ class HomeFragment : Fragment() {
         }
     }
 
-    private fun setupSearch() {
-        binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                query?.let {
-                    viewModel.searchEvents(it)
-                }
-                return true
+    private fun navigateToDetail(eventItem: EventItem) {
+        when (eventItem) {
+            is EventItem.Regular -> {
+                val detailEvent = HomeFragmentDirections.actionNavigationHomeToDetailFragment(eventItem.event.id)
+                findNavController().navigate(detailEvent)
             }
-
-            override fun onQueryTextChange(newText: String?): Boolean {
-                if (newText.isNullOrEmpty()) {
-                    binding.rvSearchResults.visibility = View.GONE
-                    binding.rvUpcoming.visibility = View.VISIBLE
-                    binding.rvCompleted.visibility = View.VISIBLE
-                    binding.upcomingTitle.visibility = View.VISIBLE
-                    binding.completedTitle.visibility = View.VISIBLE
-                }
-                return true
+            is EventItem.Favorite -> {
+                val detailEvent = HomeFragmentDirections.actionNavigationHomeToDetailFragment(eventItem.event.id)
+                findNavController().navigate(detailEvent)
             }
-        })
+        }
     }
 
     override fun onDestroyView() {
