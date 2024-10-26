@@ -4,15 +4,18 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.dicoding.dicodingevent.data.EventRepository
 import com.dicoding.dicodingevent.data.local.entity.EventEntity
 import com.dicoding.dicodingevent.data.remote.response.Event
 import com.dicoding.dicodingevent.data.remote.response.ListEventsItem
+import com.dicoding.dicodingevent.ui.setting.SettingPreferences
 import kotlinx.coroutines.launch
 
 class EventViewModel(
-    private val eventRepository: EventRepository
+    private val eventRepository: EventRepository,
+    private val pref: SettingPreferences
 ) : ViewModel() {
 
     private val _errorMessage = MutableLiveData<String?>()
@@ -120,5 +123,15 @@ class EventViewModel(
 
     fun getEventById(id: Int): LiveData<EventEntity> {
         return eventRepository.getEventById(id)
+    }
+
+    fun getThemeSettings(): LiveData<Boolean> {
+        return pref.getThemeSetting().asLiveData()
+    }
+
+    fun saveThemeSetting(isDarkModeActive: Boolean) {
+        viewModelScope.launch {
+            pref.saveThemeSetting(isDarkModeActive)
+        }
     }
 }
