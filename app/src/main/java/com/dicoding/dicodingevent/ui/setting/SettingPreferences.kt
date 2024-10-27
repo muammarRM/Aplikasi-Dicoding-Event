@@ -1,6 +1,7 @@
 package com.dicoding.dicodingevent.ui.setting
 
 import android.content.Context
+import android.content.res.Configuration
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -16,9 +17,12 @@ class SettingPreferences private constructor(private val dataStore: DataStore<Pr
     private val themekey = booleanPreferencesKey("theme_setting")
     private val dailyreminderkey = booleanPreferencesKey("daily_reminder")
 
-    fun getThemeSetting(): Flow<Boolean> {
+    fun getThemeSetting(context: Context): Flow<Boolean> {
+        val isSystemDarkMode = (context.resources.configuration.uiMode
+                and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+
         return dataStore.data.map { preferences ->
-            preferences[themekey] ?: false
+            preferences[themekey] ?: isSystemDarkMode
         }
     }
 

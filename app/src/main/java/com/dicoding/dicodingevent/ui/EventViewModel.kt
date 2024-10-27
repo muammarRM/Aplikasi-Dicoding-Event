@@ -1,5 +1,6 @@
 package com.dicoding.dicodingevent.ui
 
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -125,8 +126,8 @@ class EventViewModel(
         return eventRepository.getEventById(id)
     }
 
-    fun getThemeSettings(): LiveData<Boolean> {
-        return pref.getThemeSetting().asLiveData()
+    fun getThemeSettings(context: Context): LiveData<Boolean> {
+        return pref.getThemeSetting(context).asLiveData()
     }
     fun getDailyReminderSetting(): LiveData<Boolean> {
         return pref.getDailyReminderSetting().asLiveData()

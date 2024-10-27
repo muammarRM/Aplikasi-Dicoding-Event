@@ -61,7 +61,7 @@ class SettingFragment : Fragment() {
         val currentNightMode = resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK
         val isSystemDarkMode = currentNightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES
 
-        viewModel.getThemeSettings().observe(viewLifecycleOwner) { isDarkModeActive ->
+        viewModel.getThemeSettings(requireContext()).observe(viewLifecycleOwner) { isDarkModeActive ->
             val shouldUseDarkMode = isDarkModeActive || isSystemDarkMode
             AppCompatDelegate.setDefaultNightMode(
                 if (shouldUseDarkMode) AppCompatDelegate.MODE_NIGHT_YES
@@ -87,7 +87,7 @@ class SettingFragment : Fragment() {
         val currentNightMode = resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK
         val isSystemDarkMode = currentNightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES
 
-        viewModel.getThemeSettings().observe(viewLifecycleOwner) { isDarkModeActive ->
+        viewModel.getThemeSettings(requireContext()).observe(viewLifecycleOwner) { isDarkModeActive ->
             val shouldUseDarkMode = isDarkModeActive || isSystemDarkMode
             AppCompatDelegate.setDefaultNightMode(
                 if (shouldUseDarkMode) AppCompatDelegate.MODE_NIGHT_YES
